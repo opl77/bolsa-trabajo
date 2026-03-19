@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: bolsa_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: bolsa_trabajo_db
+      MYSQL_USER: bolsa_user
+      MYSQL_PASSWORD: password_seguro_aqui
+    ports: ["3306:3306"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: bolsa_redis
+    ports: ["6379:6379"]
+    restart: unless-stopped
+
+  backend:
+    build: { context: ./backend }
+    container_name: bolsa_backend
+    env_file: ./backend/.env
+    ports: ["5000:5000"]
+    depends_on: [mysql, redis]
+    volumes: ["./backend:/app"]
+    restart: unless-stopped
+
+  frontend:
+    build: { context: ./frontend }
+    container_name: bolsa_frontend
+    ports: ["3000:3000"]
+    depends_on: [backend]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
