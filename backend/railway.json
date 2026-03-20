@@ -1,1 +1,1 @@
-{"build":{"builder":"DOCKERFILE","dockerfilePath":"Dockerfile"},"deploy":{"startCommand":"python run.py","restartPolicyType":"ON_FAILURE"}}
+﻿{"build":{"builder":"DOCKERFILE","dockerfilePath":"Dockerfile"},"deploy":{"startCommand":"python run.py","restartPolicyType":"ON_FAILURE"}}
