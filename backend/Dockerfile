@@ -2,7 +2,8 @@
 
 RUN apt-get update && apt-get install -y \
     gcc \
-    libpq-dev \
+    default-libmysqlclient-dev \
+    pkg-config \
     libgdk-pixbuf-xlib-2.0-0 \
     libcairo2 \
     libpango-1.0-0 \
@@ -12,6 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install mysqlclient PyMySQL
 
 COPY . .
 
