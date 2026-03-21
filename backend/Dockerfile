@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install mysqlclient PyMySQL
+RUN pip install mysqlclient PyMySQL gunicorn eventlet
 
 COPY . .
 
 EXPOSE 5000
-CMD ["python", "run.py"]
+CMD gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT run:app
