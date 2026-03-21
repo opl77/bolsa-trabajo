@@ -157,7 +157,7 @@ def login():
     # Si tiene 2FA activo → token temporal
     if usuario.totp_activo:
         token_temp = create_access_token(
-            identity=usuario.id,
+            identity=str(usuario.id),
             additional_claims={
                 'rol': usuario.rol,
                 '2fa_verified': False,
@@ -181,7 +181,7 @@ def login():
     EmailService.enviar_otp(usuario.email, otp)
 
     token_temp = create_access_token(
-        identity=usuario.id,
+        identity=str(usuario.id),
         additional_claims={
             'rol': usuario.rol,
             '2fa_verified': False,
@@ -230,7 +230,7 @@ def verificar_2fa():
 
     # Generar tokens finales con 2FA confirmado
     access_token  = create_access_token(
-        identity=usuario_id,
+        identity=str(usuario_id),
         additional_claims={'rol': usuario.rol, '2fa_verified': True}
     )
     refresh_token = create_refresh_token(identity=usuario_id)
@@ -264,7 +264,7 @@ def refresh():
         return jsonify({"error": "Usuario inactivo"}), 401
 
     nuevo_token = create_access_token(
-        identity=usuario_id,
+        identity=str(usuario_id),
         additional_claims={'rol': usuario.rol, '2fa_verified': True}
     )
 
