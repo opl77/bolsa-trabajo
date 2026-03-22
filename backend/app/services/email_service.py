@@ -1,5 +1,5 @@
-# ============================================================
-# services/email_service.py — Servicio de correo electrónico
+﻿# ============================================================
+# services/email_service.py â€” Servicio de correo electrÃ³nico
 # ============================================================
 from flask import current_app, render_template_string
 from flask_mail import Message
@@ -7,15 +7,15 @@ from app import mail
 
 
 TEMPLATE_OTP = """
-<h2>Tu código de verificación</h2>
-<p>Usa el siguiente código para completar tu inicio de sesión:</p>
+<h2>Tu cÃ³digo de verificaciÃ³n</h2>
+<p>Usa el siguiente cÃ³digo para completar tu inicio de sesiÃ³n:</p>
 <h1 style="letter-spacing:8px;color:#2563eb;">{{ codigo }}</h1>
-<p>Este código expira en <strong>5 minutos</strong>.</p>
-<p>Si no fuiste tú, ignora este mensaje.</p>
+<p>Este cÃ³digo expira en <strong>5 minutos</strong>.</p>
+<p>Si no fuiste tÃº, ignora este mensaje.</p>
 """
 
 TEMPLATE_ALERTA = """
-<h2 style="color:red;">⚠️ Alerta de Seguridad</h2>
+<h2 style="color:red;">âš ï¸ Alerta de Seguridad</h2>
 <p>Detectamos actividad sospechosa en tu cuenta:</p>
 <ul>
 {% for anomalia in anomalias %}
@@ -23,8 +23,8 @@ TEMPLATE_ALERTA = """
 {% endfor %}
 </ul>
 <p>IP detectada: <strong>{{ ip }}</strong></p>
-<p>Tu sesión fue cerrada automáticamente por seguridad.</p>
-<p>Si no reconoces esta actividad, cambia tu contraseña inmediatamente.</p>
+<p>Tu sesiÃ³n fue cerrada automÃ¡ticamente por seguridad.</p>
+<p>Si no reconoces esta actividad, cambia tu contraseÃ±a inmediatamente.</p>
 """
 
 
@@ -46,7 +46,7 @@ class EmailService:
     def enviar_otp(email: str, otp: str):
         from jinja2 import Template
         html = Template(TEMPLATE_OTP).render(codigo=otp)
-        EmailService._enviar(email, "Tu código de verificación — Bolsa de Trabajo", html)
+        EmailService._enviar(email, "Tu cÃ³digo de verificaciÃ³n â€” Bolsa de Trabajo", html)
 
     @staticmethod
     def enviar_alerta_seguridad(usuario_id: int, anomalias: list, ip: str):
@@ -58,7 +58,7 @@ class EmailService:
         html = Template(TEMPLATE_ALERTA).render(anomalias=anomalias, ip=ip)
         EmailService._enviar(
             usuario.email,
-            "⚠️ Alerta de seguridad — Bolsa de Trabajo",
+            "âš ï¸ Alerta de seguridad â€” Bolsa de Trabajo",
             html
         )
 
@@ -70,19 +70,19 @@ class EmailService:
             return
         if accion == 'aprobar':
             html = f"""
-            <h2>¡Tu empresa fue aprobada!</h2>
+            <h2>Â¡Tu empresa fue aprobada!</h2>
             <p>La empresa <strong>{empresa.nombre}</strong> ha sido validada.</p>
             <p>Ya puedes publicar vacantes en la plataforma.</p>
             """
-            asunto = "✅ Empresa aprobada — Bolsa de Trabajo"
+            asunto = "âœ… Empresa aprobada â€” Bolsa de Trabajo"
         else:
             html = f"""
             <h2>Empresa no aprobada</h2>
             <p>Tu empresa <strong>{empresa.nombre}</strong> no fue aprobada.</p>
-            <p>Razón: {empresa.razon_rechazo or 'No especificada'}</p>
-            <p>Puedes contactar al administrador para más información.</p>
+            <p>RazÃ³n: {empresa.razon_rechazo or 'No especificada'}</p>
+            <p>Puedes contactar al administrador para mÃ¡s informaciÃ³n.</p>
             """
-            asunto = "❌ Empresa no aprobada — Bolsa de Trabajo"
+            asunto = "âŒ Empresa no aprobada â€” Bolsa de Trabajo"
         EmailService._enviar(usuario.email, asunto, html)
 
     @staticmethod
@@ -92,22 +92,22 @@ class EmailService:
         if not usuario:
             return
         estados = {
-            'en_revision': ('📋 Tu postulación está en revisión', 'está siendo revisada'),
-            'aceptada':    ('🎉 ¡Felicidades! Tu postulación fue aceptada', 'fue aceptada'),
-            'rechazada':   ('Tu postulación no fue seleccionada', 'no fue seleccionada en esta ocasión'),
+            'en_revision': ('ðŸ“‹ Tu postulaciÃ³n estÃ¡ en revisiÃ³n', 'estÃ¡ siendo revisada'),
+            'aceptada':    ('ðŸŽ‰ Â¡Felicidades! Tu postulaciÃ³n fue aceptada', 'fue aceptada'),
+            'rechazada':   ('Tu postulaciÃ³n no fue seleccionada', 'no fue seleccionada en esta ocasiÃ³n'),
         }
-        asunto, msg = estados.get(postulacion.estado, ('Actualización de postulación', 'fue actualizada'))
+        asunto, msg = estados.get(postulacion.estado, ('ActualizaciÃ³n de postulaciÃ³n', 'fue actualizada'))
         html = f"""
         <h2>{asunto}</h2>
-        <p>Tu postulación para <strong>{postulacion.vacante.titulo}</strong>
+        <p>Tu postulaciÃ³n para <strong>{postulacion.vacante.titulo}</strong>
         en <strong>{postulacion.vacante.empresa.nombre}</strong> {msg}.</p>
-        <p>Ingresa a la plataforma para más detalles.</p>
+        <p>Ingresa a la plataforma para mÃ¡s detalles.</p>
         """
         EmailService._enviar(usuario.email, asunto, html)
 
 
 # ============================================================
-# routes/chat.py — Chat en tiempo real con SocketIO
+# routes/chat.py â€” Chat en tiempo real con SocketIO
 # ============================================================
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -125,11 +125,11 @@ chat_bp = Blueprint('chat', __name__)
 @jwt_required()
 @sesion_segura
 def historial_chat(postulacion_id):
-    """Obtiene historial de mensajes de una postulación"""
+    """Obtiene historial de mensajes de una postulaciÃ³n"""
     usuario_id  = get_jwt_identity()
     postulacion = Postulacion.query.get_or_404(postulacion_id)
 
-    # Verificar que el usuario pertenece a esta conversación
+    # Verificar que el usuario pertenece a esta conversaciÃ³n
     if not _tiene_acceso_chat(usuario_id, postulacion):
         return jsonify({"error": "Sin acceso"}), 403
 
@@ -145,7 +145,7 @@ def historial_chat(postulacion_id):
 
 
 def _tiene_acceso_chat(usuario_id: int, postulacion: Postulacion) -> bool:
-    """Verifica que solo empresa y postulante de esta postulación accedan"""
+    """Verifica que solo empresa y postulante de esta postulaciÃ³n accedan"""
     empresa_usuario_id    = postulacion.vacante.empresa.usuario_id
     postulante_usuario_id = postulacion.postulante.usuario_id
     return usuario_id in (empresa_usuario_id, postulante_usuario_id)
@@ -182,7 +182,7 @@ def registrar_eventos_socket(socketio):
         db.session.add(mensaje)
         db.session.commit()
 
-        # Emitir a la sala (mensaje descifrado solo en tránsito por WSS)
+        # Emitir a la sala (mensaje descifrado solo en trÃ¡nsito por WSS)
         room = f"chat_{postulacion_id}"
         emit('nuevo_mensaje', {
             "id":         mensaje.id,
@@ -195,3 +195,4 @@ def registrar_eventos_socket(socketio):
     def salir_chat(data):
         postulacion_id = data.get('postulacion_id')
         leave_room(f"chat_{postulacion_id}")
+
