@@ -28,7 +28,7 @@ class Config:
     JWT_TOKEN_LOCATION                = ['cookies']
     JWT_COOKIE_SECURE                 = True                   # Solo HTTPS
     JWT_COOKIE_HTTPONLY               = True                   # JS no puede leer
-    JWT_COOKIE_SAMESITE               = 'Strict'               # Anti-CSRF
+    JWT_COOKIE_SAMESITE               = 'None'               # Anti-CSRF
     JWT_ACCESS_COOKIE_NAME            = '_sid'                 # Nombre no descriptivo
     JWT_REFRESH_COOKIE_NAME           = '_srid'
     JWT_COOKIE_CSRF_PROTECT           = True
