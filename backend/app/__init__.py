@@ -50,7 +50,7 @@ def create_app(config_name: str = None) -> Flask:
     socketio.init_app(
         app,
         cors_allowed_origins=app.config['FRONTEND_URL'],
-        async_mode='eventlet',
+        async_mode='gevent',
         manage_session=False
     )
 
