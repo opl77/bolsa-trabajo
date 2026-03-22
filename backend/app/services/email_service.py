@@ -196,3 +196,4 @@ def registrar_eventos_socket(socketio):
         postulacion_id = data.get('postulacion_id')
         leave_room(f"chat_{postulacion_id}")
 
+
