@@ -5,9 +5,9 @@ RUN apt-get update && apt-get install -y gcc default-libmysqlclient-dev pkg-conf
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install mysqlclient PyMySQL gunicorn gevent
+RUN pip install mysqlclient PyMySQL gunicorn
 
 COPY . .
 
 EXPOSE 5000
-CMD gunicorn --worker-class gevent -w 1 --bind 0.0.0.0:$PORT run:app
+CMD gunicorn -w 2 --bind 0.0.0.0:$PORT --timeout 60 run:app
