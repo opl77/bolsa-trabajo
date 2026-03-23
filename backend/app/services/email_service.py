@@ -1,9 +1,10 @@
 ﻿# ============================================================
 # services/email_service.py - Servicio de correo electronico
 # ============================================================
-from flask import current_app, render_template_string
+from flask import current_app
 from flask_mail import Message
 from app import mail
+import threading
 
 
 TEMPLATE_OTP = """
@@ -32,15 +33,22 @@ class EmailService:
 
     @staticmethod
     def _enviar(destinatario: str, asunto: str, html: str):
-        try:
-            msg = Message(
-                subject    = asunto,
-                recipients = [destinatario],
-                html       = html
-            )
-            mail.send(msg)
-        except Exception as e:
-            current_app.logger.error(f"Error enviando email a {destinatario}: {e}")
+        app = current_app._get_current_object()
+        def _send():
+            with app.app_context():
+                try:
+                    msg = Message(
+                        subject    = asunto,
+                        recipients = [destinatario],
+                        html       = html
+                    )
+                    mail.send(msg)
+                    app.logger.info(f"Email enviado a {destinatario}")
+                except Exception as e:
+                    app.logger.error(f"Error enviando email a {destinatario}: {e}")
+        t = threading.Thread(target=_send)
+        t.daemon = True
+        t.start()
 
     @staticmethod
     def enviar_otp(email: str, otp: str):
