@@ -49,7 +49,7 @@ class EmailService:
                             'from': 'Bolsa de Trabajo <onboarding@resend.dev>'
                             # TODO: cambiar a dominio propio en produccion
                             # TODO: cambiar a dominio propio en produccion,
-                            'to': [os.environ.get(''MAIL_TEST_RECIPIENT'', destinatario)],
+                            'to': [os.environ.get('MAIL_TEST_RECIPIENT', destinatario)],
                             'subject': asunto,
                             'html': html
                         }
@@ -110,6 +110,7 @@ class EmailService:
         asunto, msg = estados.get(postulacion.estado, ('Actualizacion', 'fue actualizada'))
         html = f"<h2>{asunto}</h2><p>Tu postulacion para {postulacion.vacante.titulo} {msg}.</p>"
         EmailService._enviar(usuario.email, asunto, html)
+
 
 
 
