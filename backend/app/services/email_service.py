@@ -3,6 +3,7 @@
 # ============================================================
 import threading
 import requests
+import os
 from flask import current_app
 from jinja2 import Template
 
@@ -37,8 +38,8 @@ class EmailService:
         def _send():
             with app.app_context():
                 try:
-                    import os
                     api_key = os.environ.get('RESEND_API_KEY')
+                    to = os.environ.get('MAIL_TEST_RECIPIENT', destinatario)
                     response = requests.post(
                         'https://api.resend.com/emails',
                         headers={
@@ -46,16 +47,14 @@ class EmailService:
                             'Content-Type': 'application/json'
                         },
                         json={
-                            'from': 'Bolsa de Trabajo <onboarding@resend.dev>'
-                            # TODO: cambiar a dominio propio en produccion
-                            # TODO: cambiar a dominio propio en produccion,
-                            'to': [os.environ.get('MAIL_TEST_RECIPIENT', destinatario)],
+                            'from': 'Bolsa de Trabajo <onboarding@resend.dev>',
+                            'to': [to],
                             'subject': asunto,
                             'html': html
                         }
                     )
-                    if response.status_code == 200 or response.status_code == 201:
-                        app.logger.info(f"Email enviado a {destinatario}")
+                    if response.status_code in (200, 201):
+                        app.logger.info(f"Email enviado a {to}")
                     else:
                         app.logger.error(f"Error Resend: {response.text}")
                 except Exception as e:
@@ -76,11 +75,7 @@ class EmailService:
         if not usuario:
             return
         html = Template(TEMPLATE_ALERTA).render(anomalias=anomalias, ip=ip)
-        EmailService._enviar(
-            usuario.email,
-            "Alerta de seguridad - Bolsa de Trabajo",
-            html
-        )
+        EmailService._enviar(usuario.email, "Alerta de seguridad - Bolsa de Trabajo", html)
 
     @staticmethod
     def notificar_validacion_empresa(empresa, accion: str):
@@ -110,7 +105,3 @@ class EmailService:
         asunto, msg = estados.get(postulacion.estado, ('Actualizacion', 'fue actualizada'))
         html = f"<h2>{asunto}</h2><p>Tu postulacion para {postulacion.vacante.titulo} {msg}.</p>"
         EmailService._enviar(usuario.email, asunto, html)
-
-
-
-
