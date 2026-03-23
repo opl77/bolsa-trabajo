@@ -221,7 +221,7 @@ def verificar_2fa():
         verificado = totp.verify(codigo, valid_window=1)
     else:
         otp_guardado = redis_client.get(f"otp:{usuario_id}")
-        if otp_guardado and otp_guardado.decode("utf-8") == codigo:
+        if otp_guardado and otp_guardado == codigo:
             redis_client.delete(f"otp:{usuario_id}")
             verificado = True
 
@@ -368,5 +368,6 @@ def verificar_sesion():
         "rol": claims.get('rol'),
         "2fa_verified": claims.get('2fa_verified')
     })
+
 
 
