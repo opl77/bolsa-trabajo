@@ -91,6 +91,23 @@ class EmailService:
             asunto = "Empresa no aprobada - Bolsa de Trabajo"
         EmailService._enviar(usuario.email, asunto, html)
 
+
+    @staticmethod
+    def enviar_reset_password(email: str, token: str):
+        import os
+        frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+        url = f"{frontend_url}/reset-password?token={token}"
+        html = f"""
+        <h2>Recuperacion de contrasena</h2>
+        <p>Haz clic en el siguiente enlace para restablecer tu contrasena:</p>
+        <a href="{url}" style="background:#2563eb;color:white;padding:12px 24px;
+           border-radius:8px;text-decoration:none;display:inline-block;margin:16px 0;">
+           Restablecer contrasena
+        </a>
+        <p>Este enlace expira en <strong>30 minutos</strong>.</p>
+        <p>Si no solicitaste esto, ignora este mensaje.</p>
+        """
+        EmailService._enviar(email, "Recuperacion de contrasena - Bolsa de Trabajo", html)
     @staticmethod
     def notificar_estado_postulacion(postulacion):
         from app.models import Usuario
@@ -105,3 +122,4 @@ class EmailService:
         asunto, msg = estados.get(postulacion.estado, ('Actualizacion', 'fue actualizada'))
         html = f"<h2>{asunto}</h2><p>Tu postulacion para {postulacion.vacante.titulo} {msg}.</p>"
         EmailService._enviar(usuario.email, asunto, html)
+

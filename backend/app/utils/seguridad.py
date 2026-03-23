@@ -1,5 +1,5 @@
-# ============================================================
-# utils/seguridad.py — Utilidades de seguridad
+﻿# ============================================================
+# utils/seguridad.py â€” Utilidades de seguridad
 # ============================================================
 import hashlib
 import secrets
@@ -9,9 +9,9 @@ import bcrypt
 from flask import request
 
 
-# ── Fingerprinting de cliente ─────────────────────────────────
+# â”€â”€ Fingerprinting de cliente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generar_huella(req=None) -> str:
-    """Genera huella digital del cliente para detectar robo de sesión"""
+    """Genera huella digital del cliente para detectar robo de sesiÃ³n"""
     req = req or request
     user_agent  = req.headers.get('User-Agent', '')
     accept_lang = req.headers.get('Accept-Language', '')
@@ -30,7 +30,7 @@ def obtener_ip_real(req=None) -> str:
 
 
 def obtener_pais(ip: str) -> str:
-    """Geolocalización básica — retorna código de país"""
+    """GeolocalizaciÃ³n bÃ¡sica â€” retorna cÃ³digo de paÃ­s"""
     try:
         import geoip2.database
         with geoip2.database.Reader('GeoLite2-Country.mmdb') as reader:
@@ -39,7 +39,7 @@ def obtener_pais(ip: str) -> str:
         return 'XX'
 
 
-# ── Sanitización anti-XSS ────────────────────────────────────
+# â”€â”€ SanitizaciÃ³n anti-XSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 TAGS_PERMITIDOS   = []    # Sin HTML
 ATTRS_PERMITIDOS  = {}
 
@@ -58,7 +58,7 @@ def sanitizar_html_basico(texto: str) -> str:
     return bleach.clean(str(texto), tags=tags, attributes=attrs, strip=True)
 
 
-# ── Manejo de contraseñas ─────────────────────────────────────
+# â”€â”€ Manejo de contraseÃ±as â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 COST_FACTOR = 12
 
 def hashear_password(password: str) -> str:
@@ -73,25 +73,26 @@ def verificar_password(password: str, hash_guardado: str) -> bool:
 def validar_fortaleza_password(password: str) -> tuple:
     """Retorna (es_valida, mensaje)"""
     if len(password) < 10:
-        return False, "Mínimo 10 caracteres"
+        return False, "MÃ­nimo 10 caracteres"
     if not any(c.isupper() for c in password):
-        return False, "Al menos una mayúscula"
+        return False, "Al menos una mayÃºscula"
     if not any(c.islower() for c in password):
-        return False, "Al menos una minúscula"
+        return False, "Al menos una minÃºscula"
     if not any(c.isdigit() for c in password):
-        return False, "Al menos un número"
-    especiales = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        return False, "Al menos un nÃºmero"
+    especiales = "!@#$%^&*()_+-=[]{}|;:,.<>?/\~`@"
     if not any(c in especiales for c in password):
-        return False, "Al menos un carácter especial (!@#$%...)"
+        return False, "Al menos un carÃ¡cter especial (!@#$%...)"
     return True, "OK"
 
 
-# ── OTP por email ─────────────────────────────────────────────
+# â”€â”€ OTP por email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generar_otp(longitud: int = 6) -> str:
-    """Genera OTP numérico seguro"""
+    """Genera OTP numÃ©rico seguro"""
     return ''.join(secrets.choice(string.digits) for _ in range(longitud))
 
 
-# ── Tokens seguros ────────────────────────────────────────────
+# â”€â”€ Tokens seguros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generar_token_seguro(longitud: int = 32) -> str:
     return secrets.token_urlsafe(longitud)
+

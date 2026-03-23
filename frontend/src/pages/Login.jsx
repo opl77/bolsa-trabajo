@@ -1,5 +1,5 @@
-// ============================================================
-// pages/Login.jsx — Página de inicio de sesión
+﻿// ============================================================
+// pages/Login.jsx â€” PÃ¡gina de inicio de sesiÃ³n
 // ============================================================
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -35,13 +35,13 @@ export default function Login() {
         setPaso(2);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      setError(err.response?.data?.error || 'Error al iniciar sesiÃ³n');
     } finally {
       setCargando(false);
     }
   };
 
-  // Paso 2: código 2FA
+  // Paso 2: cÃ³digo 2FA
   const handleVerificar2FA = async e => {
     e.preventDefault();
     setError('');
@@ -52,7 +52,7 @@ export default function Login() {
       const destinos = { admin: '/admin', empresa: '/empresa', postulante: '/postulante' };
       navigate(destinos[data.rol] || '/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Código incorrecto');
+      setError(err.response?.data?.error || 'CÃ³digo incorrecto');
     } finally {
       setCargando(false);
     }
@@ -103,11 +103,11 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Panel derecho — formulario */}
+      {/* Panel derecho â€” formulario */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
 
-          {/* Logo móvil */}
+          {/* Logo mÃ³vil */}
           <div className="lg:hidden flex items-center gap-2 mb-10">
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-black">B</span>
@@ -115,10 +115,10 @@ export default function Login() {
             <span className="text-white font-bold">BolsaUni</span>
           </div>
 
-          {/* Alerta externa (sesión expirada, etc.) */}
+          {/* Alerta externa (sesiÃ³n expirada, etc.) */}
           {mensajeExterno && (
             <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-              <p className="text-amber-400 text-sm">⚠️ {mensajeExterno}</p>
+              <p className="text-amber-400 text-sm">âš ï¸ {mensajeExterno}</p>
             </div>
           )}
 
@@ -131,13 +131,13 @@ export default function Login() {
 
               {error && (
                 <div className="mb-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                  <p className="text-red-400 text-sm">❌ {error}</p>
+                  <p className="text-red-400 text-sm">âŒ {error}</p>
                 </div>
               )}
 
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label className="block text-slate-400 text-sm mb-2">Correo electrónico</label>
+                  <label className="block text-slate-400 text-sm mb-2">Correo electrÃ³nico</label>
                   <input type="email" name="email" value={form.email}
                     onChange={handleChange} required
                     placeholder="tu@universidad.edu.mx"
@@ -147,17 +147,17 @@ export default function Login() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 text-sm mb-2">Contraseña</label>
+                  <label className="block text-slate-400 text-sm mb-2">ContraseÃ±a</label>
                   <div className="relative">
                     <input type={showPass ? 'text' : 'password'} name="password"
                       value={form.password} onChange={handleChange} required
-                      placeholder="••••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       className="w-full bg-slate-800/50 border border-slate-700 text-white
                                  rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-blue-500
                                  focus:ring-1 focus:ring-blue-500/50 transition placeholder-slate-600" />
                     <button type="button" onClick={() => setShowPass(!showPass)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-                      {showPass ? '🙈' : '👁️'}
+                      {showPass ? 'ðŸ™ˆ' : 'ðŸ‘ï¸'}
                     </button>
                   </div>
                 </div>
@@ -169,13 +169,14 @@ export default function Login() {
                   {cargando ? (
                     <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
                     Verificando...</>
-                  ) : 'Iniciar sesión →'}
+                  ) : 'Iniciar sesiÃ³n â†’'}
                 </button>
               </form>
 
+              <div className="mt-2 text-right"><Link to="/recuperar-password" className="text-slate-500 hover:text-blue-400 text-sm">¿Olvidaste tu contraseña?</Link></div>
               <div className="mt-6 flex items-center gap-4">
                 <div className="flex-1 h-px bg-slate-800"/>
-                <span className="text-slate-600 text-sm">¿No tienes cuenta?</span>
+                <span className="text-slate-600 text-sm">Â¿No tienes cuenta?</span>
                 <div className="flex-1 h-px bg-slate-800"/>
               </div>
 
@@ -183,37 +184,37 @@ export default function Login() {
                 <Link to="/registro/empresa"
                   className="text-center bg-slate-800 hover:bg-slate-700 text-slate-300
                              py-2.5 rounded-xl text-sm transition border border-slate-700">
-                  🏢 Soy empresa
+                  ðŸ¢ Soy empresa
                 </Link>
                 <Link to="/registro/postulante"
                   className="text-center bg-slate-800 hover:bg-slate-700 text-slate-300
                              py-2.5 rounded-xl text-sm transition border border-slate-700">
-                  🎓 Soy estudiante
+                  ðŸŽ“ Soy estudiante
                 </Link>
               </div>
             </>
           ) : (
-            /* Paso 2 — Verificar 2FA */
+            /* Paso 2 â€” Verificar 2FA */
             <>
               <button onClick={() => setPaso(1)} className="text-slate-500 hover:text-slate-300 mb-6 flex items-center gap-1 text-sm">
-                ← Volver
+                â† Volver
               </button>
 
               <div className="mb-8 text-center">
                 <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">{metodo2fa === 'totp' ? '🔐' : '📧'}</span>
+                  <span className="text-3xl">{metodo2fa === 'totp' ? 'ðŸ”' : 'ðŸ“§'}</span>
                 </div>
-                <h2 className="text-2xl font-black text-white mb-2">Verificación en dos pasos</h2>
+                <h2 className="text-2xl font-black text-white mb-2">VerificaciÃ³n en dos pasos</h2>
                 <p className="text-slate-400 text-sm">
                   {metodo2fa === 'totp'
-                    ? 'Ingresa el código de tu app autenticadora'
-                    : 'Ingresa el código que enviamos a tu correo'}
+                    ? 'Ingresa el cÃ³digo de tu app autenticadora'
+                    : 'Ingresa el cÃ³digo que enviamos a tu correo'}
                 </p>
               </div>
 
               {error && (
                 <div className="mb-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                  <p className="text-red-400 text-sm">❌ {error}</p>
+                  <p className="text-red-400 text-sm">âŒ {error}</p>
                 </div>
               )}
 
@@ -227,7 +228,7 @@ export default function Login() {
                 <button type="submit" disabled={cargando || codigo2fa.length < 6}
                   className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800
                              text-white font-semibold py-3 rounded-xl transition">
-                  {cargando ? 'Verificando...' : 'Verificar código ✓'}
+                  {cargando ? 'Verificando...' : 'Verificar cÃ³digo âœ“'}
                 </button>
               </form>
             </>
@@ -237,3 +238,4 @@ export default function Login() {
     </div>
   );
 }
+

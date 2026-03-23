@@ -371,3 +371,39 @@ def verificar_sesion():
 
 
 
+
+
+# -- RECUPERAR CONTRASENA: Paso 1 - Solicitar reset
+@auth_bp.route('/recuperar-password', methods=['POST'])
+@limiter.limit("3 per hour")
+def solicitar_reset():
+    data  = request.get_json()
+    email = sanitizar(data.get('email', ''))
+    usuario = Usuario.query.filter_by(email=email).first()
+    if usuario:
+        token = generar_token_seguro(32)
+        redis_client.setex(f"reset:{token}", 1800, str(usuario.id))
+        from app.services.email_service import EmailService
+        EmailService.enviar_reset_password(email, token)
+    return jsonify({"mensaje": "Si el correo existe, recibiras instrucciones"}), 200
+
+
+# -- RECUPERAR CONTRASENA: Paso 2 - Nueva contrasena
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data     = request.get_json()
+    token    = sanitizar(data.get('token', ''))
+    password = data.get('password', '')
+    usuario_id = redis_client.get(f"reset:{token}")
+    if not usuario_id:
+        return jsonify({"error": "Token invalido o expirado"}), 400
+    es_valida, msg = validar_fortaleza_password(password)
+    if not es_valida:
+        return jsonify({"error": msg}), 400
+    usuario = Usuario.query.get(int(usuario_id))
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    usuario.password_hash = hashear_password(password)
+    db.session.commit()
+    redis_client.delete(f"reset:{token}")
+    return jsonify({"mensaje": "Contrasena actualizada correctamente"}), 200

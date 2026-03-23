@@ -1,18 +1,19 @@
-// ============================================================
-// App.jsx — Enrutamiento principal con rutas protegidas
+﻿// ============================================================
+// App.jsx â€” Enrutamiento principal con rutas protegidas
 // ============================================================
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Páginas
+// PÃ¡ginas
 import Login from './pages/Login';
 import RegistroEmpresa, { RegistroPostulante } from './pages/RegistroEmpresa';
 import AdminDashboard    from './pages/admin/Dashboard';
 import EmpresaDashboard  from './pages/empresa/Dashboard';
 import PostulanteDashboard from './pages/postulante/Dashboard';
 import Configuracion2FA from './pages/Configuracion2FA';
+import ResetPassword from './pages/ResetPassword';
 
-// ── Ruta protegida por rol ────────────────────────────────────
+// â”€â”€ Ruta protegida por rol â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RutaProtegida({ children, rol }) {
   const { usuario, cargando } = useAuth();
 
@@ -28,7 +29,7 @@ function RutaProtegida({ children, rol }) {
   return children;
 }
 
-// ── Redirección por rol al iniciar sesión ─────────────────────
+// â”€â”€ RedirecciÃ³n por rol al iniciar sesiÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RedirectPorRol() {
   const { usuario, cargando } = useAuth();
   if (cargando) return null;
@@ -40,10 +41,12 @@ function RedirectPorRol() {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Públicas */}
+      {/* PÃºblicas */}
       <Route path="/login"               element={<Login />} />
       <Route path="/registro/empresa"    element={<RegistroEmpresa />} />
       <Route path="/registro/postulante" element={<RegistroPostulante />} />
+      <Route path="/recuperar-password" element={<ResetPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Admin */}
       <Route path="/admin" element={
@@ -60,7 +63,7 @@ function AppRoutes() {
         <RutaProtegida rol="postulante"><PostulanteDashboard /></RutaProtegida>
       }/>
 
-      {/* Raíz → redirige según rol */}
+      {/* RaÃ­z â†’ redirige segÃºn rol */}
       <Route path="/" element={<RedirectPorRol />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -76,3 +79,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
