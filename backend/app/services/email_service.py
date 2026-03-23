@@ -1,10 +1,10 @@
 ﻿# ============================================================
 # services/email_service.py - Servicio de correo electronico
 # ============================================================
-from flask import current_app
-from flask_mail import Message
-from app import mail
 import threading
+import requests
+from flask import current_app
+from jinja2 import Template
 
 
 TEMPLATE_OTP = """
@@ -37,13 +37,25 @@ class EmailService:
         def _send():
             with app.app_context():
                 try:
-                    msg = Message(
-                        subject    = asunto,
-                        recipients = [destinatario],
-                        html       = html
+                    import os
+                    api_key = os.environ.get('RESEND_API_KEY')
+                    response = requests.post(
+                        'https://api.resend.com/emails',
+                        headers={
+                            'Authorization': f'Bearer {api_key}',
+                            'Content-Type': 'application/json'
+                        },
+                        json={
+                            'from': 'Bolsa de Trabajo <onboarding@resend.dev>',
+                            'to': [destinatario],
+                            'subject': asunto,
+                            'html': html
+                        }
                     )
-                    mail.send(msg)
-                    app.logger.info(f"Email enviado a {destinatario}")
+                    if response.status_code == 200 or response.status_code == 201:
+                        app.logger.info(f"Email enviado a {destinatario}")
+                    else:
+                        app.logger.error(f"Error Resend: {response.text}")
                 except Exception as e:
                     app.logger.error(f"Error enviando email a {destinatario}: {e}")
         t = threading.Thread(target=_send)
@@ -52,7 +64,6 @@ class EmailService:
 
     @staticmethod
     def enviar_otp(email: str, otp: str):
-        from jinja2 import Template
         html = Template(TEMPLATE_OTP).render(codigo=otp)
         EmailService._enviar(email, "Tu codigo de verificacion - Bolsa de Trabajo", html)
 
@@ -62,7 +73,6 @@ class EmailService:
         usuario = Usuario.query.get(usuario_id)
         if not usuario:
             return
-        from jinja2 import Template
         html = Template(TEMPLATE_ALERTA).render(anomalias=anomalias, ip=ip)
         EmailService._enviar(
             usuario.email,
