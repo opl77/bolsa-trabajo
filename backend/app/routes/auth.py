@@ -1,5 +1,5 @@
-# ============================================================
-# routes/auth.py — Autenticación segura con 2FA
+﻿# ============================================================
+# routes/auth.py â€” AutenticaciÃ³n segura con 2FA
 # ============================================================
 import pyotp
 import qrcode
@@ -48,7 +48,7 @@ def crear_sesion(usuario_id: int, jti: str) -> SesionActiva:
     return sesion
 
 
-# ── REGISTRO ─────────────────────────────────────────────────
+# â”€â”€ REGISTRO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/registro', methods=['POST'])
 @limiter.limit("3 per hour")
 def registro():
@@ -62,14 +62,14 @@ def registro():
         return jsonify({"error": "Todos los campos son requeridos"}), 400
 
     if rol not in ('empresa', 'postulante'):
-        return jsonify({"error": "Rol inválido"}), 400
+        return jsonify({"error": "Rol invÃ¡lido"}), 400
 
     valida, msg = validar_fortaleza_password(password)
     if not valida:
         return jsonify({"error": msg}), 400
 
     if Usuario.query.filter_by(email=email).first():
-        return jsonify({"error": "El correo ya está registrado"}), 409
+        return jsonify({"error": "El correo ya estÃ¡ registrado"}), 409
 
     # Crear usuario
     usuario = Usuario(
@@ -80,7 +80,7 @@ def registro():
     db.session.add(usuario)
     db.session.flush()
 
-    # Crear perfil según rol
+    # Crear perfil segÃºn rol
     if rol == 'empresa':
         nombre = sanitizar(data.get('nombre_empresa', ''))
         if not nombre:
@@ -109,7 +109,7 @@ def registro():
     }), 201
 
 
-# ── LOGIN — Paso 1: Email + Password ─────────────────────────
+# â”€â”€ LOGIN â€” Paso 1: Email + Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit("5 per minute")
 def login():
@@ -119,7 +119,7 @@ def login():
     ip       = obtener_ip_real(request)
 
     if not email or not password:
-        return jsonify({"error": "Email y contraseña requeridos"}), 400
+        return jsonify({"error": "Email y contraseÃ±a requeridos"}), 400
 
     usuario = Usuario.query.filter_by(email=email).first()
 
@@ -135,7 +135,7 @@ def login():
             "error": f"Cuenta bloqueada. Intenta en {minutos} minutos"
         }), 423
 
-    # Verificar contraseña
+    # Verificar contraseÃ±a
     if not verificar_password(password, usuario.password_hash):
         usuario.intentos_fallidos += 1
 
@@ -154,7 +154,7 @@ def login():
     db.session.commit()
     registrar_intento(email, ip, True)
 
-    # Si tiene 2FA activo → token temporal
+    # Si tiene 2FA activo â†’ token temporal
     if usuario.totp_activo:
         token_temp = create_access_token(
             identity=str(usuario.id),
@@ -166,14 +166,14 @@ def login():
             expires_delta=timedelta(minutes=5)
         )
         resp = jsonify({
-            "mensaje": "Verifica tu código 2FA",
+            "mensaje": "Verifica tu cÃ³digo 2FA",
             "requiere_2fa": True,
             "metodo_2fa": "totp"
         })
         set_access_cookies(resp, token_temp)
         return resp, 200
 
-    # Sin 2FA → enviar OTP por correo
+    # Sin 2FA â†’ enviar OTP por correo
     otp = generar_otp()
     redis_client.setex(f"otp:{usuario.id}", 300, otp)
 
@@ -190,7 +190,7 @@ def login():
         expires_delta=timedelta(minutes=5)
     )
     resp = jsonify({
-        "mensaje": "Se envió un código a tu correo",
+        "mensaje": "Se enviÃ³ un cÃ³digo a tu correo",
         "requiere_2fa": True,
         "metodo_2fa": "email"
     })
@@ -198,7 +198,7 @@ def login():
     return resp, 200
 
 
-# ── LOGIN — Paso 2: Verificar 2FA ────────────────────────────
+# â”€â”€ LOGIN â€” Paso 2: Verificar 2FA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/verificar-2fa', methods=['POST'])
 @jwt_required()
 def verificar_2fa():
@@ -208,7 +208,7 @@ def verificar_2fa():
     claims     = get_jwt()
 
     if not claims.get('temp'):
-        return jsonify({"error": "Token inválido para esta operación"}), 400
+        return jsonify({"error": "Token invÃ¡lido para esta operaciÃ³n"}), 400
 
     usuario = Usuario.query.get(usuario_id)
     if not usuario:
@@ -226,7 +226,7 @@ def verificar_2fa():
             verificado = True
 
     if not verificado:
-        return jsonify({"error": "Código incorrecto o expirado"}), 401
+        return jsonify({"error": "CÃ³digo incorrecto o expirado"}), 401
 
     # Generar tokens finales con 2FA confirmado
     access_token  = create_access_token(
@@ -235,7 +235,7 @@ def verificar_2fa():
     )
     refresh_token = create_refresh_token(identity=usuario_id)
 
-    # Crear sesión activa
+    # Crear sesiÃ³n activa
     from flask_jwt_extended import decode_token
     jti = decode_token(access_token)['jti']
     crear_sesion(usuario_id, jti)
@@ -244,7 +244,7 @@ def verificar_2fa():
     redis_client.setex(f"actividad:{usuario_id}", 180, "activo")
 
     resp = jsonify({
-        "mensaje": "Sesión iniciada correctamente",
+        "mensaje": "SesiÃ³n iniciada correctamente",
         "rol": usuario.rol,
         "2fa_verified": True
     })
@@ -253,7 +253,7 @@ def verificar_2fa():
     return resp, 200
 
 
-# ── REFRESH TOKEN (actividad del usuario) ────────────────────
+# â”€â”€ REFRESH TOKEN (actividad del usuario) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
@@ -275,7 +275,7 @@ def refresh():
     return resp, 200
 
 
-# ── LOGOUT ───────────────────────────────────────────────────
+# â”€â”€ LOGOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/logout', methods=['DELETE'])
 @jwt_required()
 def logout():
@@ -285,7 +285,7 @@ def logout():
     # Blacklist del token actual
     redis_client.setex(f"blacklist:{jti}", 86400, "logout")
 
-    # Cerrar sesión en BD
+    # Cerrar sesiÃ³n en BD
     SesionActiva.query.filter_by(jti=jti).update({
         'activa': False,
         'razon_cierre': 'logout_manual'
@@ -295,12 +295,12 @@ def logout():
     # Limpiar actividad
     redis_client.delete(f"actividad:{usuario_id}")
 
-    resp = jsonify({"mensaje": "Sesión cerrada"})
+    resp = jsonify({"mensaje": "SesiÃ³n cerrada"})
     unset_jwt_cookies(resp)
     return resp, 200
 
 
-# ── ACTIVAR 2FA (TOTP) ───────────────────────────────────────
+# â”€â”€ ACTIVAR 2FA (TOTP) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/2fa/activar-totp', methods=['POST'])
 @jwt_required()
 def activar_totp():
@@ -327,7 +327,7 @@ def activar_totp():
     })
 
 
-# ── CONFIRMAR 2FA (TOTP) ─────────────────────────────────────
+# â”€â”€ CONFIRMAR 2FA (TOTP) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/2fa/confirmar-totp', methods=['POST'])
 @jwt_required()
 def confirmar_totp():
@@ -338,11 +338,11 @@ def confirmar_totp():
 
     secreto = redis_client.get(f"totp_temp:{usuario_id}")
     if not secreto:
-        return jsonify({"error": "Sesión de configuración expirada"}), 400
+        return jsonify({"error": "SesiÃ³n de configuraciÃ³n expirada"}), 400
 
     totp = pyotp.TOTP(secreto)
     if not totp.verify(codigo, valid_window=1):
-        return jsonify({"error": "Código incorrecto"}), 401
+        return jsonify({"error": "CÃ³digo incorrecto"}), 401
 
     usuario.totp_secret = secreto
     usuario.totp_activo = True
@@ -352,7 +352,7 @@ def confirmar_totp():
     return jsonify({"mensaje": "2FA activado correctamente"})
 
 
-# ── VERIFICAR SESIÓN ACTIVA ───────────────────────────────────
+# â”€â”€ VERIFICAR SESIÃ“N ACTIVA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @auth_bp.route('/sesion', methods=['GET'])
 @jwt_required()
 def verificar_sesion():
@@ -368,3 +368,4 @@ def verificar_sesion():
         "rol": claims.get('rol'),
         "2fa_verified": claims.get('2fa_verified')
     })
+
