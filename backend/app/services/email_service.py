@@ -32,15 +32,20 @@ class EmailService:
 
     @staticmethod
     def _enviar(destinatario: str, asunto: str, html: str):
-        import logging
-        logging.warning(f"[OTP] Email para {destinatario} | Asunto: {asunto} | Contenido: {html}")
+        try:
+            msg = Message(
+                subject    = asunto,
+                recipients = [destinatario],
+                html       = html
+            )
+            mail.send(msg)
+        except Exception as e:
+            current_app.logger.error(f"Error enviando email a {destinatario}: {e}")
 
     @staticmethod
     def enviar_otp(email: str, otp: str):
         from jinja2 import Template
         html = Template(TEMPLATE_OTP).render(codigo=otp)
-        import logging
-        logging.warning(f"[OTP-CODE] Codigo para {email}: {otp}")
         EmailService._enviar(email, "Tu codigo de verificacion - Bolsa de Trabajo", html)
 
     @staticmethod
