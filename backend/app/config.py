@@ -23,7 +23,7 @@ class Config:
 
     # â”€â”€ JWT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     JWT_SECRET_KEY                    = os.environ.get('JWT_SECRET_KEY')
-    JWT_ACCESS_TOKEN_EXPIRES          = timedelta(minutes=3)   # Timeout inactividad
+    JWT_ACCESS_TOKEN_EXPIRES          = timedelta(minutes=30)   # Timeout inactividad
     JWT_REFRESH_TOKEN_EXPIRES         = timedelta(hours=8)
     JWT_TOKEN_LOCATION                = ['cookies']
     JWT_COOKIE_SECURE                 = True                   # Solo HTTPS
@@ -93,4 +93,5 @@ config = {
     'production':  ProductionConfig,
     'default':     DevelopmentConfig,
 }
+
 
