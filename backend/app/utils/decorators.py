@@ -1,5 +1,5 @@
-# ============================================================
-# utils/decorators.py — Decoradores de seguridad y roles
+﻿# ============================================================
+# utils/decorators.py â€” Decoradores de seguridad y roles
 # ============================================================
 from functools import wraps
 from datetime import datetime
@@ -33,7 +33,7 @@ def dos_fa_requerido(f):
         claims = get_jwt()
         if not claims.get('2fa_verified'):
             return jsonify({
-                "error": "Se requiere verificación 2FA",
+                "error": "Se requiere verificaciÃ³n 2FA",
                 "codigo": "2FA_REQUIRED"
             }), 403
         return f(*args, **kwargs)
@@ -42,10 +42,10 @@ def dos_fa_requerido(f):
 
 def sesion_segura(f):
     """
-    Valida integridad de sesión en cada request:
+    Valida integridad de sesiÃ³n en cada request:
     - Verifica huella digital (User-Agent)
     - Detecta cambio de IP sospechoso
-    - Detecta cambio de país
+    - Detecta cambio de paÃ­s
     """
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -61,7 +61,7 @@ def sesion_segura(f):
         sesion = SesionActiva.query.filter_by(jti=jti, activa=True).first()
         if not sesion:
             return jsonify({
-                "error": "Sesión inválida o expirada",
+                "error": "SesiÃ³n invÃ¡lida o expirada",
                 "codigo": "SESSION_INVALID"
             }), 401
 
@@ -71,15 +71,11 @@ def sesion_segura(f):
 
         anomalias = []
 
-        # Detectar cambio brusco de IP
-        if sesion.ip_origen != ip_actual:
-            anomalias.append('ip_cambiada')
-
         # Detectar cambio de User-Agent (posible robo de cookie)
         if sesion.user_agent_hash != huella_actual:
             anomalias.append('useragent_cambiado')
 
-        # Detectar acceso desde país diferente
+        # Detectar acceso desde paÃ­s diferente
         if sesion.pais and sesion.pais != pais_actual:
             anomalias.append('pais_inusual')
 
@@ -112,11 +108,11 @@ def sesion_segura(f):
             EmailService.enviar_alerta_seguridad(usuario_id, anomalias, ip_actual)
 
             return jsonify({
-                "error": "Sesión terminada por seguridad. Revisa tu correo.",
+                "error": "SesiÃ³n terminada por seguridad. Revisa tu correo.",
                 "codigo": "SESSION_HIJACK_DETECTED"
             }), 401
 
-        # ✅ Actualizar último uso
+        # âœ… Actualizar Ãºltimo uso
         sesion.ultimo_uso = datetime.utcnow()
         db.session.commit()
 
@@ -125,3 +121,4 @@ def sesion_segura(f):
 
         return f(*args, **kwargs)
     return decorated
+
