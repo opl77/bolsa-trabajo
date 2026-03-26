@@ -71,9 +71,6 @@ def sesion_segura(f):
 
         anomalias = []
 
-        # Detectar cambio de User-Agent (posible robo de cookie)
-        if sesion.user_agent_hash != huella_actual:
-            anomalias.append('useragent_cambiado')
 
         # Detectar acceso desde paÃ­s diferente
         if sesion.pais and sesion.pais != pais_actual:
@@ -121,4 +118,5 @@ def sesion_segura(f):
 
         return f(*args, **kwargs)
     return decorated
+
 
