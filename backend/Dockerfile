@@ -10,4 +10,5 @@ RUN pip install mysqlclient PyMySQL gunicorn
 COPY . .
 
 EXPOSE 5000
-CMD gunicorn -w 2 --bind 0.0.0.0:$PORT --timeout 60 run:app
+CMD flask db upgrade && gunicorn -w 2 --bind 0.0.0.0:$PORT --timeout 60 run:app
+

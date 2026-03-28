@@ -263,7 +263,6 @@ class SesionActiva(db.Model):
     ip_origen       = db.Column(db.String(45))
     user_agent_hash = db.Column(db.String(64))
     pais            = db.Column(db.String(10))
-    num_vacantes    = db.Column(db.Integer, default=1)
     activa          = db.Column(db.Boolean, default=True)
     creado_en       = db.Column(db.DateTime, default=datetime.utcnow)
     ultimo_uso      = db.Column(db.DateTime, default=datetime.utcnow)
@@ -340,4 +339,5 @@ class DispositivoConfianza(db.Model):
     ip_registro     = db.Column(db.String(45))
     confiable       = db.Column(db.Boolean, default=True)
     creado_en       = db.Column(db.DateTime, default=datetime.utcnow)
+
 
