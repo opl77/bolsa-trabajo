@@ -352,7 +352,8 @@ def mis_vacantes():
         "ciudad":        v.ciudad,
         "salario_min":   float(v.salario_min) if v.salario_min else None,
         "salario_max":   float(v.salario_max) if v.salario_max else None,
-        "activa":        v.activa,`n        "num_vacantes":  v.num_vacantes,
+        "activa":        v.activa,
+        "num_vacantes":  v.num_vacantes,
         "creado_en":     v.creado_en.isoformat(),
     } for v in vacantes])
 
@@ -398,4 +399,5 @@ def eliminar_vacante(vacante_id):
     vacante.activa = False
     db.session.commit()
     return jsonify({"mensaje": "Vacante eliminada"})
+
 
