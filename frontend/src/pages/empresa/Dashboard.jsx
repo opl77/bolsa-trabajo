@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // pages/empresa/Dashboard.jsx
 // ============================================================
 import { useState, useEffect } from 'react';
@@ -20,7 +20,7 @@ function NavEmpresa({ tab, setTab, onLogout }) {
           <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full border border-blue-500/30">Empresa</span>
         </div>
         <div className="hidden md:flex gap-1">
-          {[['vacantes','💼 Vacantes'],['postulantes','👥 Postulantes'],['mensajes','💬 Mensajes'],['perfil','🏢 Perfil']].map(([key,label]) => (
+          {[['vacantes','Vacantes'],['postulantes','Postulantes'],['mensajes','Mensajes'],['perfil','Perfil']].map(([key,label]) => (
             <button key={key} onClick={() => setTab(key)}
               className={`px-3 py-1.5 rounded-lg text-sm transition ${tab===key ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}>
               {label}
@@ -28,27 +28,34 @@ function NavEmpresa({ tab, setTab, onLogout }) {
           ))}
         </div>
       </div>
-      <button onClick={onLogout} className="text-slate-400 hover:text-white text-sm transition">Salir →</button>
+      <button onClick={onLogout} className="text-slate-400 hover:text-white text-sm transition">Salir</button>
     </nav>
   );
 }
 
-function ModalNuevaVacante({ onClose, onCreada }) {
-  const [form, setForm] = useState({
+function ModalVacante({ vacante, onClose, onGuardada }) {
+  const editando = !!vacante;
+  const [form, setForm] = useState(vacante || {
     titulo:'', descripcion:'', requisitos:'', area:'', tipo_contrato:'practicas',
-    modalidad:'presencial', ciudad:'', salario_min:'', salario_max:''
+    modalidad:'presencial', ciudad:'', salario_min:'', salario_max:'', num_vacantes: 1
   });
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async e => {
     e.preventDefault();
     setCargando(true);
+    setError('');
     try {
-      await api.post('/empresa/vacantes', form);
-      onCreada();
+      if (editando) {
+        await api.put(`/empresa/vacantes/${vacante.id}`, form);
+      } else {
+        await api.post('/empresa/vacantes', form);
+      }
+      onGuardada();
       onClose();
     } catch (err) {
-      alert(err.response?.data?.error || 'Error');
+      setError(err.response?.data?.error || 'Error al guardar');
     } finally { setCargando(false); }
   };
 
@@ -56,12 +63,13 @@ function ModalNuevaVacante({ onClose, onCreada }) {
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Nueva Vacante</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">×</button>
+          <h3 className="text-lg font-bold text-white">{editando ? 'Editar Vacante' : 'Nueva Vacante'}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">x</button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">{error}</div>}
           <div>
-            <label className="block text-slate-400 text-sm mb-2">Título del puesto *</label>
+            <label className="block text-slate-400 text-sm mb-2">Titulo del puesto *</label>
             <input value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} required
               className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
               placeholder="Desarrollador Frontend Jr." />
@@ -71,7 +79,7 @@ function ModalNuevaVacante({ onClose, onCreada }) {
               <label className="block text-slate-400 text-sm mb-2">Tipo de contrato</label>
               <select value={form.tipo_contrato} onChange={e => setForm({...form, tipo_contrato: e.target.value})}
                 className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500">
-                <option value="practicas">Prácticas</option>
+                <option value="practicas">Practicas</option>
                 <option value="medio_tiempo">Medio tiempo</option>
                 <option value="tiempo_completo">Tiempo completo</option>
                 <option value="proyecto">Por proyecto</option>
@@ -83,11 +91,11 @@ function ModalNuevaVacante({ onClose, onCreada }) {
                 className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500">
                 <option value="presencial">Presencial</option>
                 <option value="remoto">Remoto</option>
-                <option value="hibrido">Híbrido</option>
+                <option value="hibrido">Hibrido</option>
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div>
               <label className="block text-slate-400 text-sm mb-2">Ciudad</label>
               <input value={form.ciudad} onChange={e => setForm({...form, ciudad: e.target.value})}
@@ -106,9 +114,15 @@ function ModalNuevaVacante({ onClose, onCreada }) {
                 className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
                 placeholder="15000" />
             </div>
+            <div>
+              <label className="block text-slate-400 text-sm mb-2">Num. vacantes</label>
+              <input type="number" min="1" value={form.num_vacantes} onChange={e => setForm({...form, num_vacantes: e.target.value})}
+                className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                placeholder="1" />
+            </div>
           </div>
           <div>
-            <label className="block text-slate-400 text-sm mb-2">Descripción</label>
+            <label className="block text-slate-400 text-sm mb-2">Descripcion</label>
             <textarea value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} rows={3}
               className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 resize-none"
               placeholder="Describe el puesto y responsabilidades..." />
@@ -117,7 +131,7 @@ function ModalNuevaVacante({ onClose, onCreada }) {
             <label className="block text-slate-400 text-sm mb-2">Requisitos</label>
             <textarea value={form.requisitos} onChange={e => setForm({...form, requisitos: e.target.value})} rows={3}
               className="w-full bg-slate-700/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 resize-none"
-              placeholder="React, Node.js, inglés intermedio..." />
+              placeholder="React, Node.js, ingles intermedio..." />
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
@@ -126,7 +140,7 @@ function ModalNuevaVacante({ onClose, onCreada }) {
             </button>
             <button type="submit" disabled={cargando}
               className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-semibold py-3 rounded-xl transition">
-              {cargando ? 'Publicando...' : 'Publicar vacante ✓'}
+              {cargando ? 'Guardando...' : (editando ? 'Guardar cambios' : 'Publicar vacante')}
             </button>
           </div>
         </form>
@@ -138,14 +152,15 @@ function ModalNuevaVacante({ onClose, onCreada }) {
 export default function EmpresaDashboard() {
   const { logout } = useAuth();
   const navigate   = useNavigate();
-  const [tab, setTab]           = useState('vacantes');
-  const [vacantes, setVacantes] = useState([]);
-  const [postulantes, setPostulantes] = useState([]);
+  const [tab, setTab]                     = useState('vacantes');
+  const [vacantes, setVacantes]           = useState([]);
+  const [postulantes, setPostulantes]     = useState([]);
   const [vacanteSeleccionada, setVacanteSeleccionada] = useState(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [cargando, setCargando] = useState(true);
+  const [modalVacante, setModalVacante]   = useState(null); // null=cerrado, 'nueva', o vacante obj
+  const [cargando, setCargando]           = useState(true);
 
   const cargarVacantes = () => {
+    setCargando(true);
     api.get('/empresa/vacantes').then(r => setVacantes(r.data)).catch(() => {}).finally(() => setCargando(false));
   };
 
@@ -158,6 +173,16 @@ export default function EmpresaDashboard() {
     setPostulantes(data);
   };
 
+  const eliminarVacante = async (vacante) => {
+    if (!window.confirm(`Eliminar vacante "${vacante.titulo}"?`)) return;
+    try {
+      await api.delete(`/empresa/vacantes/${vacante.id}`);
+      cargarVacantes();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al eliminar');
+    }
+  };
+
   const actualizarEstado = async (postulacionId, estado) => {
     await api.put(`/empresa/postulaciones/${postulacionId}/estado`, { estado });
     setPostulantes(prev => prev.map(p => p.postulacion_id === postulacionId ? {...p, estado} : p));
@@ -165,17 +190,24 @@ export default function EmpresaDashboard() {
 
   const handleLogout = async () => { await logout(); navigate('/login'); };
 
-  const badgeEstado = e => ({
-    practicas: 'bg-blue-500/20 text-blue-400',
-    medio_tiempo: 'bg-yellow-500/20 text-yellow-400',
-    tiempo_completo: 'bg-green-500/20 text-green-400',
-    proyecto: 'bg-purple-500/20 text-purple-400',
-  }[e] || 'bg-slate-500/20 text-slate-400');
+  const badgeContrato = e => ({
+    practicas: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    medio_tiempo: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    tiempo_completo: 'bg-green-500/20 text-green-400 border-green-500/30',
+    proyecto: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  }[e] || 'bg-slate-500/20 text-slate-400 border-slate-600');
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <NavEmpresa tab={tab} setTab={setTab} onLogout={handleLogout} />
-      {mostrarModal && <ModalNuevaVacante onClose={() => setMostrarModal(false)} onCreada={cargarVacantes} />}
+
+      {modalVacante && (
+        <ModalVacante
+          vacante={modalVacante === 'nueva' ? null : modalVacante}
+          onClose={() => setModalVacante(null)}
+          onGuardada={cargarVacantes}
+        />
+      )}
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {tab === 'vacantes' && (
@@ -185,8 +217,8 @@ export default function EmpresaDashboard() {
                 <h1 className="text-3xl font-black">Mis Vacantes</h1>
                 <p className="text-slate-400 mt-1">{vacantes.length} vacantes publicadas</p>
               </div>
-              <button onClick={() => setMostrarModal(true)}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-medium transition flex items-center gap-2">
+              <button onClick={() => setModalVacante('nueva')}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-medium transition">
                 + Nueva vacante
               </button>
             </div>
@@ -196,9 +228,9 @@ export default function EmpresaDashboard() {
               </div>
             ) : vacantes.length === 0 ? (
               <div className="text-center py-20 text-slate-500">
-                <span className="text-5xl block mb-4">💼</span>
-                <p className="text-lg mb-4">Aún no tienes vacantes publicadas</p>
-                <button onClick={() => setMostrarModal(true)}
+                <p className="text-5xl block mb-4">💼</p>
+                <p className="text-lg mb-4">Aun no tienes vacantes publicadas</p>
+                <button onClick={() => setModalVacante('nueva')}
                   className="bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-500 transition">
                   Publicar primera vacante
                 </button>
@@ -210,23 +242,36 @@ export default function EmpresaDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-white font-bold text-lg">{v.titulo}</h3>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${badgeEstado(v.tipo_contrato)}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${badgeContrato(v.tipo_contrato)}`}>
                           {v.tipo_contrato?.replace('_',' ')}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">
                           {v.modalidad}
                         </span>
+                        {v.num_vacantes > 1 && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            {v.num_vacantes} plazas
+                          </span>
+                        )}
                       </div>
                       <p className="text-slate-400 text-sm">
-                        📍 {v.ciudad || 'Sin especificar'} ·{' '}
-                        {v.salario_min ? `$${v.salario_min.toLocaleString()} - $${v.salario_max?.toLocaleString()} MXN` : 'Salario a convenir'} ·{' '}
-                        {new Date(v.creado_en).toLocaleDateString('es-MX')}
+                        {v.ciudad || 'Sin especificar'} · {v.salario_min ? `$${Number(v.salario_min).toLocaleString()} - $${Number(v.salario_max).toLocaleString()} MXN` : 'Salario a convenir'} · {new Date(v.creado_en).toLocaleDateString('es-MX')}
                       </p>
                     </div>
-                    <button onClick={() => verPostulantes(v)}
-                      className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm transition ml-4">
-                      Ver postulantes
-                    </button>
+                    <div className="flex gap-2 ml-4">
+                      <button onClick={() => verPostulantes(v)}
+                        className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm transition">
+                        Postulantes
+                      </button>
+                      <button onClick={() => setModalVacante(v)}
+                        className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-xl text-sm transition">
+                        Editar
+                      </button>
+                      <button onClick={() => eliminarVacante(v)}
+                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-4 py-2 rounded-xl text-sm transition">
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -245,8 +290,8 @@ export default function EmpresaDashboard() {
             </div>
             {postulantes.length === 0 ? (
               <div className="text-center py-20 text-slate-500">
-                <span className="text-5xl block mb-3">👥</span>
-                <p>Aún no hay postulantes para esta vacante</p>
+                <p className="text-5xl block mb-3">👥</p>
+                <p>Aun no hay postulantes para esta vacante</p>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -268,11 +313,11 @@ export default function EmpresaDashboard() {
                       {p.estado === 'enviada' && <>
                         <button onClick={() => actualizarEstado(p.postulacion_id, 'aceptada')}
                           className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 px-3 py-1.5 rounded-lg text-xs transition">
-                          ✓ Aceptar
+                          Aceptar
                         </button>
                         <button onClick={() => actualizarEstado(p.postulacion_id, 'rechazada')}
                           className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs transition">
-                          ✗ Rechazar
+                          Rechazar
                         </button>
                       </>}
                     </div>
@@ -284,14 +329,15 @@ export default function EmpresaDashboard() {
         )}
 
         {tab === 'mensajes' && (
-          <ListaChats postulaciones={vacantes.flatMap(v => [])} usuarioId={null} rol="empresa" />
+          <ListaChats postulaciones={[]} usuarioId={null} rol="empresa" />
         )}
 
-        {tab === 'perfil' && (          <div className="max-w-lg">
+        {tab === 'perfil' && (
+          <div className="max-w-lg">
             <h1 className="text-3xl font-black mb-8">Perfil de Empresa</h1>
             <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 text-center text-slate-400">
-              <span className="text-4xl block mb-3">🏢</span>
-              <p>Edición de perfil — próximamente</p>
+              <p className="text-4xl block mb-3">🏢</p>
+              <p>Edicion de perfil - proximamente</p>
             </div>
           </div>
         )}
