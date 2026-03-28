@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # routes/vacantes.py
 # ============================================================
 from flask import Blueprint, request, jsonify
@@ -144,7 +144,7 @@ def validar_empresa(empresa_id):
         empresa.estado_validacion = 'rechazada'
         empresa.razon_rechazo     = sanitizar(data.get('razon', ''))
     else:
-        return jsonify({"error": "Acción inválida"}), 400
+        return jsonify({"error": "AcciÃ³n invÃ¡lida"}), 400
 
     db.session.commit()
 
@@ -206,6 +206,7 @@ def crear_vacante():
         salario_min   = data.get('salario_min'),
         salario_max   = data.get('salario_max'),
         ciudad        = sanitizar(data.get('ciudad', '')),
+        num_vacantes  = int(data.get('num_vacantes', 1)),
     )
     db.session.add(vacante)
     db.session.commit()
@@ -254,7 +255,7 @@ def actualizar_estado_postulacion(postulacion_id):
     nuevo_estado = sanitizar(data.get('estado', ''))
 
     if nuevo_estado not in ('en_revision', 'aceptada', 'rechazada'):
-        return jsonify({"error": "Estado inválido"}), 400
+        return jsonify({"error": "Estado invÃ¡lido"}), 400
 
     postulacion = Postulacion.query.get_or_404(postulacion_id)
     postulacion.estado = nuevo_estado
@@ -304,7 +305,7 @@ def postularse():
     db.session.add(postulacion)
     db.session.commit()
 
-    return jsonify({"mensaje": "Postulación enviada exitosamente", "id": postulacion.id}), 201
+    return jsonify({"mensaje": "PostulaciÃ³n enviada exitosamente", "id": postulacion.id}), 201
 
 
 @postulante_bp.route('/postulaciones', methods=['GET'])
@@ -328,3 +329,73 @@ def mis_postulaciones():
             "ciudad":  p.vacante.ciudad,
         }
     } for p in postulaciones])
+
+
+@empresa_bp.route('/vacantes', methods=['GET'])
+@jwt_required()
+@dos_fa_requerido
+@sesion_segura
+def mis_vacantes():
+    if get_jwt().get('rol') != 'empresa':
+        return jsonify({"error": "Acceso denegado"}), 403
+    usuario_id = get_jwt_identity()
+    empresa    = Empresa.query.filter_by(usuario_id=usuario_id).first()
+    if not empresa:
+        return jsonify([])
+    vacantes = Vacante.query.filter_by(empresa_id=empresa.id).order_by(Vacante.creado_en.desc()).all()
+    return jsonify([{
+        "id":            v.id,
+        "titulo":        v.titulo,
+        "area":          v.area,
+        "modalidad":     v.modalidad,
+        "tipo_contrato": v.tipo_contrato,
+        "ciudad":        v.ciudad,
+        "salario_min":   float(v.salario_min) if v.salario_min else None,
+        "salario_max":   float(v.salario_max) if v.salario_max else None,
+        "activa":        v.activa,`n        "num_vacantes":  v.num_vacantes,
+        "creado_en":     v.creado_en.isoformat(),
+    } for v in vacantes])
+
+
+@empresa_bp.route('/vacantes/<int:vacante_id>', methods=['PUT'])
+@jwt_required()
+@dos_fa_requerido
+@sesion_segura
+def editar_vacante(vacante_id):
+    if get_jwt().get('rol') != 'empresa':
+        return jsonify({"error": "Acceso denegado"}), 403
+    usuario_id = get_jwt_identity()
+    empresa    = Empresa.query.filter_by(usuario_id=usuario_id).first()
+    vacante    = Vacante.query.get_or_404(vacante_id)
+    if vacante.empresa_id != empresa.id:
+        return jsonify({"error": "No autorizado"}), 403
+    data = request.get_json()
+    vacante.titulo        = sanitizar(data.get('titulo', vacante.titulo))
+    vacante.descripcion   = sanitizar_html_basico(data.get('descripcion', vacante.descripcion))
+    vacante.requisitos    = sanitizar_html_basico(data.get('requisitos', vacante.requisitos))
+    vacante.area          = sanitizar(data.get('area', vacante.area))
+    vacante.tipo_contrato = sanitizar(data.get('tipo_contrato', vacante.tipo_contrato))
+    vacante.modalidad     = sanitizar(data.get('modalidad', vacante.modalidad))
+    vacante.ciudad        = sanitizar(data.get('ciudad', vacante.ciudad))
+    vacante.salario_min   = data.get('salario_min', vacante.salario_min)
+    vacante.salario_max   = data.get('salario_max', vacante.salario_max)
+    db.session.commit()
+    return jsonify({"mensaje": "Vacante actualizada"})
+
+
+@empresa_bp.route('/vacantes/<int:vacante_id>', methods=['DELETE'])
+@jwt_required()
+@dos_fa_requerido
+@sesion_segura
+def eliminar_vacante(vacante_id):
+    if get_jwt().get('rol') != 'empresa':
+        return jsonify({"error": "Acceso denegado"}), 403
+    usuario_id = get_jwt_identity()
+    empresa    = Empresa.query.filter_by(usuario_id=usuario_id).first()
+    vacante    = Vacante.query.get_or_404(vacante_id)
+    if vacante.empresa_id != empresa.id:
+        return jsonify({"error": "No autorizado"}), 403
+    vacante.activa = False
+    db.session.commit()
+    return jsonify({"mensaje": "Vacante eliminada"})
+
